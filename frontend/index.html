@@ -2,15 +2,38 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>AI 视觉哨兵</title>
+    <title>AI 视觉哨兵 & 智能对话</title>
 </head>
 <body>
-    <h2>AI 视觉哨兵 (创意作品)</h2>
+    <h2>🤖 智能体对话</h2>
+    <input type="text" id="prompt" placeholder="输入你的问题..." style="width: 300px;">
+    <button onclick="sendMessage()">发送</button>
+    <div id="result" style="margin-top: 10px; font-weight: bold; color: #2980b9;"></div>
+
+    <hr style="margin-top: 20px;">
+
+    <h2>👁️ AI 视觉哨兵 (创意作品)</h2>
     <input type="file" id="imageInput" accept="image/*">
     <button onclick="uploadImage()">上传并检测</button>
-    <div id="yoloResult" style="margin-top: 20px; font-weight: bold; color: #2c3e50;"></div>
+    <div id="yoloResult" style="margin-top: 10px; font-weight: bold; color: #2c3e50;"></div>
 
     <script>
+        // 功能一：大模型对话
+        async function sendMessage() {
+            const prompt = document.getElementById('prompt').value;
+            const resultDiv = document.getElementById('result');
+            if (!prompt) return;
+            resultDiv.innerText = "思考中...";
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/chat?prompt=${encodeURIComponent(prompt)}`);
+                const data = await response.json();
+                resultDiv.innerText = "AI: " + data.response;
+            } catch (error) {
+                resultDiv.innerText = "连接失败，请确认后端已启动。";
+            }
+        }
+
+        // 功能二：AI视觉哨兵
         async function uploadImage() {
             const input = document.getElementById('imageInput');
             if (!input.files[0]) return alert("请先选择图片");
@@ -21,7 +44,6 @@
             try {
                 const response = await fetch("http://127.0.0.1:8000/detect_and_report", { method: "POST", body: formData });
                 const data = await response.json();
-                // 展示检测到的物体列表，以及大模型生成的“哨兵汇报”
                 resultDiv.innerHTML = `检测到的物体: ${data.objects.join(", ")}<br><br>🤖 哨兵汇报: ${data.report}`;
             } catch (error) {
                 resultDiv.innerText = "检测失败，请确认后端已启动。";
