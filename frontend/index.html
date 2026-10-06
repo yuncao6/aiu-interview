@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 视觉哨兵</title>
+</head>
+<body>
+    <h2>AI 视觉哨兵 (创意作品)</h2>
+    <input type="file" id="imageInput" accept="image/*">
+    <button onclick="uploadImage()">上传并检测</button>
+    <div id="yoloResult" style="margin-top: 20px; font-weight: bold; color: #2c3e50;"></div>
+
+    <script>
+        async function uploadImage() {
+            const input = document.getElementById('imageInput');
+            if (!input.files[0]) return alert("请先选择图片");
+            const formData = new FormData();
+            formData.append("file", input.files[0]);
+            const resultDiv = document.getElementById('yoloResult');
+            resultDiv.innerText = "正在检测并思考...";
+            try {
+                const response = await fetch("http://127.0.0.1:8000/detect_and_report", { method: "POST", body: formData });
+                const data = await response.json();
+                // 展示检测到的物体列表，以及大模型生成的“哨兵汇报”
+                resultDiv.innerHTML = `检测到的物体: ${data.objects.join(", ")}<br><br>🤖 哨兵汇报: ${data.report}`;
+            } catch (error) {
+                resultDiv.innerText = "检测失败，请确认后端已启动。";
+            }
+        }
+    </script>
+</body>
+</html>
